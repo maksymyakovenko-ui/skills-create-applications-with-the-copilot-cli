@@ -1,11 +1,51 @@
 const readline = require("node:readline");
 
-// Supported operations: addition (+), subtraction (-), multiplication (*), and division (/).
-function calculate(firstNumber, operation, secondNumber) {
-  if (!Number.isFinite(firstNumber) || !Number.isFinite(secondNumber)) {
+function validateNumber(number) {
+  if (!Number.isFinite(number)) {
     throw new Error("Please enter valid numbers.");
   }
+}
 
+// Returns the remainder of dividend divided by divisor.
+function modulo(dividend, divisor) {
+  validateNumber(dividend);
+  validateNumber(divisor);
+  if (divisor === 0) {
+    throw new Error("Cannot calculate modulo by zero.");
+  }
+  return dividend % divisor;
+}
+
+// Returns base raised to exponent.
+function power(base, exponent) {
+  validateNumber(base);
+  validateNumber(exponent);
+  const result = base ** exponent;
+  if (!Number.isFinite(result)) {
+    throw new Error("The power result is outside the supported numeric range.");
+  }
+  return result;
+}
+
+// Returns the square root of a non-negative number.
+function squareRoot(number) {
+  validateNumber(number);
+  if (number < 0) {
+    throw new Error("Cannot calculate the square root of a negative number.");
+  }
+  return Math.sqrt(number);
+}
+
+// Supported operations: addition (+), subtraction (-), multiplication (*), division (/),
+// modulo (%), exponentiation (^), and square root (sqrt).
+function calculate(firstNumber, operation, secondNumber) {
+  validateNumber(firstNumber);
+
+  if (operation === "sqrt") {
+    return squareRoot(firstNumber);
+  }
+
+  validateNumber(secondNumber);
   switch (operation) {
     case "+":
       return firstNumber + secondNumber;
@@ -18,8 +58,12 @@ function calculate(firstNumber, operation, secondNumber) {
         throw new Error("Cannot divide by zero.");
       }
       return firstNumber / secondNumber;
+    case "%":
+      return modulo(firstNumber, secondNumber);
+    case "^":
+      return power(firstNumber, secondNumber);
     default:
-      throw new Error("Choose one of the supported operations: +, -, *, /.");
+      throw new Error("Choose one of the supported operations: +, -, *, /, %, ^, sqrt.");
   }
 }
 
@@ -55,8 +99,9 @@ async function main() {
 
   try {
     const firstNumber = parseNumber(await ask("First number: "));
-    const operation = (await ask("Operation (+, -, *, /): ")).trim();
-    const secondNumber = parseNumber(await ask("Second number: "));
+    const operation = (await ask("Operation (+, -, *, /, %, ^, sqrt): ")).trim();
+    const secondNumber =
+      operation === "sqrt" ? undefined : parseNumber(await ask("Second number: "));
     console.log(`Result: ${calculate(firstNumber, operation, secondNumber)}`);
   } finally {
     prompt.close();
@@ -70,4 +115,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { calculate };
+module.exports = { calculate, modulo, power, squareRoot };
